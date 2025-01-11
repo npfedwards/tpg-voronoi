@@ -144,10 +144,15 @@ export default {
       this.found = geoVoronoi(this.arrayPoints).find(this.currentLongitude, this.currentLatitude);
       this.save();
     },
-    zoom (direction: 'in' | 'out') {
-      this.zoomLevel = direction === 'in' ? Math.min(this.zoomLevel * 1.5, 15) : Math.max(this.zoomLevel / 1.5, 0.5);
+    zoom (direction: 'in' | 'out', scale: number = 1.5) {
+      this.zoomLevel = direction === 'in' ? Math.min(this.zoomLevel * scale, 15) : Math.max(this.zoomLevel / scale, 0.5);
       this.projection.scale(Math.min(this.width, this.height) * this.zoomLevel);
       this.chart();
+    },
+    wheelZoom (event) {
+      if (event.ctrlKey) {
+        this.zoom(event.deltaY < 0 ? 'in' : 'out', 1.2);
+      }
     },
     backgroundColour (index: number) {
       const mod = index % this.colours.length;
@@ -191,7 +196,7 @@ export default {
 
 <template>
   <main>
-    <div ref="container" class="main-container" @wheel="(e) => {if (e.ctrlKey) {e.preventDefault(); zoom(e.deltaY < 0 ? 'in' : 'out')}}">
+    <div ref="container" class="main-container" @wheel.prevent="wheelZoom($event)">
       <div class="field has-addons" style="position: absolute; top: 5%; left: 5%">
         <div class="control">
           <button class="button" @click="zoom('in')">+</button>
